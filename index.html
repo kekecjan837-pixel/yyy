@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>金融知识查询站</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --bg-2: #0b1d35;
+      --card: rgba(10, 21, 39, 0.72);
+      --card-2: rgba(18, 33, 58, 0.86);
+      --text: #eaf2ff;
+      --muted: #a8b8d6;
+      --line: rgba(255, 255, 255, 0.12);
+      --accent: #7dd3fc;
+      --accent-2: #fbbf24;
+      --good: #34d399;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at top left, rgba(125, 211, 252, 0.18), transparent 30%),
+        radial-gradient(circle at top right, rgba(251, 191, 36, 0.16), transparent 24%),
+        linear-gradient(180deg, #05101d 0%, #07111f 45%, #081423 100%);
+      color: var(--text);
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 36px 36px;
+      mask-image: linear-gradient(180deg, rgba(0,0,0,0.65), transparent 95%);
+      opacity: 0.32;
+    }
+
+    .wrap {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero {
+      display: grid;
+      gap: 24px;
+      grid-template-columns: 1.35fr 0.85fr;
+      align-items: stretch;
+      margin-bottom: 22px;
+    }
+
+    .hero-panel, .side-panel, .section, .glossary-card {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(10, 21, 39, 0.78), rgba(10, 21, 39, 0.58));
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+      border-radius: 24px;
+    }
+
+    .hero-panel {
+      padding: 30px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero-panel::after {
+      content: "";
+      position: absolute;
+      inset: auto -10% -35% auto;
+      width: 260px;
+      height: 260px;
+      background: radial-gradient(circle, rgba(125, 211, 252, 0.28), transparent 65%);
+      filter: blur(4px);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #d9ecff;
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .eyebrow-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--good);
+      box-shadow: 0 0 12px rgba(52, 211, 153, 0.95);
+    }
+
+    h1 {
+      margin: 18px 0 12px;
+      font-size: clamp(34px, 4.8vw, 62px);
+      line-height: 0.98;
+      letter-spacing: -0.03em;
+    }
+
+    .lead {
+      max-width: 66ch;
+      margin: 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.8;
+    }
+
+    .search-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .search {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(3, 8, 16, 0.5);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 16px 18px;
+      font-size: 16px;
+      outline: none;
+      transition: 0.2s ease;
+    }
+
+    .search:focus {
+      border-color: rgba(125, 211, 252, 0.85);
+      box-shadow: 0 0 0 4px rgba(125, 211, 252, 0.15);
+    }
+
+    .btn {
+      border: none;
+      border-radius: 16px;
+      padding: 0 18px;
+      min-width: 112px;
+      color: #08111e;
+      font-weight: 700;
+      cursor: pointer;
+      background: linear-gradient(135deg, #7dd3fc, #fbbf24);
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.02);
+    }
+
+    .mini-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .stat {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .side-panel {
+      padding: 22px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .side-title {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .topic-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .chip {
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 10px 12px;
+      cursor: pointer;
+      text-align: center;
+      font-size: 14px;
+      transition: 0.18s ease;
+    }
+
+    .chip:hover, .chip.active {
+      background: rgba(125, 211, 252, 0.14);
+      border-color: rgba(125, 211, 252, 0.42);
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .section {
+      padding: 20px;
+      margin-top: 18px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .section-header h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .section-header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .results {
+      display: grid;
+      gap: 14px;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .metric {
+      border-radius: 20px;
+      padding: 18px;
+      background: linear-gradient(180deg, rgba(20, 34, 58, 0.92), rgba(12, 23, 42, 0.86));
+      border: 1px solid rgba(255,255,255,0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric::after {
+      content: "";
+      position: absolute;
+      inset: auto -12% -30% auto;
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(125, 211, 252, 0.18), transparent 65%);
+      pointer-events: none;
+    }
+
+    .metric-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .metric-name {
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .metric-value {
+      margin: 12px 0 8px;
+      font-size: 30px;
+      letter-spacing: -0.03em;
+      font-weight: 800;
+    }
+
+    .metric-change {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .positive {
+      color: #86efac;
+    }
+
+    .negative {
+      color: #fca5a5;
+    }
+
+    .neutral {
+      color: #dbeafe;
+    }
+
+    .metric-foot {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .news-card {
+      display: grid;
+      gap: 10px;
+    }
+
+    .news-title {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.45;
+    }
+
+    .news-summary {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .news-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      font-size: 12px;
+      color: #cbd5e1;
+    }
+
+    .news-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: #d9ecff;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .news-link:hover {
+      color: #ffffff;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 8px;
+      background: var(--accent);
+      box-shadow: 0 0 10px rgba(125, 211, 252, 0.8);
+    }
+
+    .card {
+      border-radius: 20px;
+      padding: 18px 18px 16px;
+      background: linear-gradient(180deg, rgba(20, 34, 58, 0.92), rgba(12, 23, 42, 0.86));
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: transform 0.16s ease, border-color 0.16s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(125, 211, 252, 0.24);
+    }
+
+    .card-top {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: #d9ecff;
+      background: rgba(125, 211, 252, 0.1);
+      border: 1px solid rgba(125, 211, 252, 0.16);
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .meta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      color: #c9d9f2;
+      font-size: 13px;
+    }
+
+    .meta span {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .glossary {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+    }
+
+    .glossary-card {
+      padding: 22px;
+    }
+
+    .qa-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    details {
+      border-radius: 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 14px 16px;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    details p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .empty {
+      display: none;
+      padding: 24px 0 8px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .footer {
+      margin-top: 18px;
+      color: rgba(233, 242, 255, 0.58);
+      font-size: 12px;
+      line-height: 1.7;
+      text-align: center;
+    }
+
+    .pulse {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-right: 8px;
+      border-radius: 50%;
+      background: var(--accent-2);
+      box-shadow: 0 0 14px rgba(251, 191, 36, 0.85);
+      vertical-align: middle;
+    }
+
+    @media (max-width: 920px) {
+      .hero, .glossary {
+        grid-template-columns: 1fr;
+      }
+
+      .metric-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .wrap {
+        width: min(100vw - 20px, 1180px);
+        padding-top: 12px;
+      }
+
+      .hero-panel, .side-panel, .section, .glossary-card {
+        border-radius: 20px;
+      }
+
+      .hero-panel {
+        padding: 22px;
+      }
+
+      .search-row {
+        grid-template-columns: 1fr;
+      }
+
+      .btn {
+        width: 100%;
+        min-height: 48px;
+      }
+
+      .mini-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .topic-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <div class="hero-panel">
+        <span class="eyebrow"><span class="eyebrow-dot"></span> 金融知识查询站</span>
+        <h1>把金融概念<br />变成随时能查的答案</h1>
+        <p class="lead">
+          这个网页可以帮你快速查询常见金融知识，比如利率、通胀、ETF、资产配置、风险、估值和宏观指标。
+          它还会自动拉取实时行情和财经新闻，适合日常学习、面试准备和快速复习。
+        </p>
+
+        <div class="search-row">
+          <input id="searchInput" class="search" type="search" placeholder="搜索关键词，例如：通胀、ETF、现金流、债券、ROE" />
+          <button id="clearBtn" class="btn">清空搜索</button>
+        </div>
+
+        <div class="mini-stats">
+          <div class="stat">
+            <strong id="resultCount">12</strong>
+            <span>条精选知识卡片</span>
+          </div>
+          <div class="stat">
+            <strong id="marketCount">0</strong>
+            <span>个实时行情标的</span>
+          </div>
+          <div class="stat">
+            <strong id="newsCount">0</strong>
+            <span>条财经新闻</span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="side-panel">
+        <h2 class="side-title">快速筛选</h2>
+        <p class="hint">点击下面任意主题，页面会只显示相关内容。你也可以直接输入关键词做全文搜索。</p>
+        <div class="topic-grid" id="topicGrid">
+          <button class="chip active" data-topic="全部">全部</button>
+          <button class="chip" data-topic="入门">入门</button>
+          <button class="chip" data-topic="投资">投资</button>
+          <button class="chip" data-topic="宏观">宏观</button>
+          <button class="chip" data-topic="公司金融">公司金融</button>
+          <button class="chip" data-topic="风险">风险</button>
+        </div>
+        <p class="hint">
+          <span class="pulse"></span>
+          提示：内容是学习用途，不构成投资建议。
+        </p>
+      </aside>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>知识库结果</h2>
+          <p>搜索或筛选后，这里会展示匹配的金融知识点。</p>
+        </div>
+      </div>
+      <div id="results" class="results"></div>
+      <div id="emptyState" class="empty">没有找到匹配内容，试试输入“利率”“ETF”“现金流”或“通胀”。</div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>实时金融数据</h2>
+          <p>默认自动刷新，若外部接口暂时不可用，会显示本地回退数据。</p>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <span id="marketStatus" class="hint">准备加载行情…</span>
+          <button id="refreshBtn" class="btn" type="button">刷新数据</button>
+        </div>
+      </div>
+      <div id="marketGrid" class="results"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>财经新闻摘要</h2>
+          <p>抓取最新财经新闻标题和摘要，帮助你快速扫一眼市场主题。</p>
+        </div>
+      </div>
+      <div id="newsList" class="results"></div>
+    </section>
+
+    <section class="glossary">
+      <div class="glossary-card">
+        <div class="section-header" style="margin-bottom: 10px;">
+          <div>
+            <h2>新手问答</h2>
+            <p>适合快速建立基础概念。</p>
+          </div>
+        </div>
+        <div class="qa-list">
+          <details open>
+            <summary>什么是资产配置？</summary>
+            <p>把资金分散到不同资产类别，比如现金、债券、股票、黄金或基金，目标是控制风险，同时争取更稳定的收益。</p>
+          </details>
+          <details>
+            <summary>为什么要关注利率？</summary>
+            <p>利率会影响借贷成本、债券价格、企业估值和市场情绪。通常利率变化，金融市场就会跟着重新定价。</p>
+          </details>
+          <details>
+            <summary>ETF 和普通基金有什么区别？</summary>
+            <p>ETF 一般像股票一样在交易所实时买卖，透明度高，费用通常较低；普通基金多按申购赎回日计算净值，交易节奏不同。</p>
+          </details>
+        </div>
+      </div>
+
+      <div class="glossary-card">
+        <div class="section-header" style="margin-bottom: 10px;">
+          <div>
+            <h2>使用建议</h2>
+            <p>让这页更像你的个人金融词典。</p>
+          </div>
+        </div>
+        <p class="hint">
+          你可以继续让我加上这些能力：
+        </p>
+        <div class="qa-list" style="margin-top: 12px;">
+          <details>
+            <summary>接入外部金融数据</summary>
+            <p>比如指数、利率、汇率、基金净值、财经新闻摘要等。</p>
+          </details>
+          <details>
+            <summary>增加更完整的词条库</summary>
+            <p>比如把“财务报表”“估值模型”“宏观指标”拆成更细的知识点。</p>
+          </details>
+          <details>
+            <summary>做成可部署的网站</summary>
+            <p>可以继续升级成 React / Vue 项目，或接入搜索接口与后端数据库。</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <p class="footer">
+      本页为学习与信息整理用途，不提供投资建议或个股推荐。金融决策请结合自己的风险承受能力与专业意见。
+    </p>
+  </main>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
